@@ -54,5 +54,19 @@
     <string name="msg_firebase_no_add">ERROR: Lugar no agregado</string>
     <string name="msg_firebase_no_update">ERROR: Lugar no actualizado</string>
     <string name="msg_firebase_no_delete">ERROR: Lugar no eliminado</string>
-    <string name="error">Error</string>
+    <string name="error">0.0</string>
+
+    <string name="msg_imagen">Imagen del lugar</string>
+    <string name="msg_graba_pausa">Graba o pausa grabación</string>
+    <string name="msg_escucha_audio">Escucha nota de audio</string>
+    <string name="msg_delete_nota">Borra nota de audio</string>
+    <string name="msg_rec_stop_nota">Graba o detiene nota de audio</string>
+    <string name="msg_take_photo">Toma foto</string>
+    <string name="msg_rotate_l">Rota izquierda</string>
+    <string name="msg_rotale_r">Rota a la derecha</string>
+    <string name="msg_graba_audio">Grabando nota de audio</string>
+    <string name="msg_detener_audio">Nota de audio detenida</string>
+    <string name="msg_subiendo_audio">Subiendo Nota Audio</string>
+    <string name="msg_subiendo_imagen">Subiendo imagen</string>
+
 </resources>

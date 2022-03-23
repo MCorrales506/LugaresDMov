@@ -11,89 +11,72 @@ import com.lugares.model.Lugar
 
 class LugarDao {
 
-    private var codigoUsuario: String
-    private var firestore: FirebaseFirestore
+    private val coleccion1 = "lugaresAPP"
+    private val usuario = Firebase.auth.currentUser?.email.toString()
+    private val coleccion2 = "misLugares"
 
-    init{
-        val usuario = Firebase.auth.currentUser?.email
-        //val usuario = Firebase.auth.currentUser?.uid
-        codigoUsuario="$usuario"
-        firestore = FirebaseFirestore.getInstance()
+    private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    init {
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
     }
 
+
     //Función para obtener la lista de lugares
-    fun getLugares() : MutableLiveData<List<Lugar>> {
-      val listaLugares = MutableLiveData<List<Lugar>>()
-      firestore.collection("lugaresApp")
-          .document(codigoUsuario)
-          .collection("misLugares")
-          .addSnapshotListener{ snapshot, e ->
-              if (e != null) {
-                  return@addSnapshotListener
-              }
-              if (snapshot != null) {
-                  val lista = ArrayList<Lugar>()
-                  val lugares = snapshot.documents
-                  lugares.forEach {
-                      val lugar = it.toObject(Lugar::class.java)
-                      if (lugar!=null) {
-                          lista.add(lugar)
-                      }
-                  }
-                  listaLugares.value = lista
-              }
-          }
+    fun getLugares(): MutableLiveData<List<Lugar>> {
+        val listaLugares = MutableLiveData<List<Lugar>>()
+        firestore.collection(coleccion1).document(usuario).collection(coleccion2)
+            .addSnapshotListener { instantanea, e ->
+                if (e != null) {  //Valida si se da un error recuperando la info de los documentos...
+                    return@addSnapshotListener
+                }
+                if (instantanea != null) {  //Si  hay información recuperada entonces...
+                    val lista = ArrayList<Lugar>()
+                    //Recorro todos los documentos de la ruta...
+                    instantanea.documents.forEach {
+                        val lugar = it.toObject(Lugar::class.java)
+                        if (lugar != null) {  //Si se pudo convertir el documento en un Lugar
+                            lista.add(lugar)   //Se agrega el lugar a la lista temporal
+                        }
+                    }
+                    listaLugares.value = lista
+                }
+            }
         return listaLugares
     }
 
-    fun saveLugar(lugar: Lugar){
-        val document: DocumentReference
-        if(lugar.id.isEmpty()) {  // Es un nuevo documento
-            document = firestore
-                .collection("lugaresApp")
-                .document(codigoUsuario)
-                .collection("misLugares")
-                .document()
-            lugar.id = document.id
-        } else {
-            document = firestore
-                .collection("lugaresApp")
-                .document(codigoUsuario)
-                .collection("misLugares")
-                .document(lugar.id)
+    suspend fun saveLugar(lugar: Lugar) {
+        val documento: DocumentReference
+        if (lugar.id.isEmpty()) {  //Si id está vacío.. es un documento nuevo..
+            documento = firestore.collection(coleccion1)
+                .document(usuario).collection(coleccion2).document()
+            lugar.id = documento.id
+        } else {  //El documento ya existe...
+            documento = firestore.collection(coleccion1)
+                .document(usuario).collection(coleccion2).document(lugar.id)
         }
-        val set = document.set(lugar)
-        set.addOnSuccessListener {
-            Log.d("AddLugar","Lugar agregado")
-        }
+        //Efectivamente se actualiza la información del lugar en firestore
+        documento.set(lugar)
+            .addOnSuccessListener {
+                Log.d("saveLugar", "Lugar agregado/modificado")
+            }
             .addOnCanceledListener {
-                Log.e("AddLugar","Lugar NO agregado")
+                Log.e("saveLugar", "Error: Lugar NO agregado/modificado")
             }
     }
 
-    fun deleteLugar(lugar: Lugar){
+
+    suspend fun deleteLugar(lugar: Lugar) {
+        //Validamos si el lugar existe en la colección... si tiene id
         if (lugar.id.isNotEmpty()) {
-            firestore
-                .collection("lugaresApp")
-                .document(codigoUsuario)
-                .collection("misLugares")
-                .document(lugar.id)
-                .delete()
+            firestore.collection(coleccion1).document(usuario)
+                .collection(coleccion2).document(lugar.id).delete()
                 .addOnSuccessListener {
-                    Log.d("deleteLugar","Lugar eliminado")
+                    Log.d("deleteLugar", "Lugar eliminado")
                 }
                 .addOnCanceledListener {
-                    Log.e("deleteLugar","Lugar NO eliminado")
+                    Log.e("deleteLugar", "Error: Lugar NO eliminado")
                 }
         }
     }
 }
-
-
-
-
-
-
-
-

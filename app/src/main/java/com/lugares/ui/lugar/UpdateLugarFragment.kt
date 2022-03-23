@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.*
@@ -12,6 +13,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.bumptech.glide.Glide
 import com.lugares.R
 import com.lugares.databinding.FragmentUpdateLugarBinding
 import com.lugares.model.Lugar
@@ -23,6 +25,7 @@ class UpdateLugarFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val args by navArgs<UpdateLugarFragmentArgs>()
+    private lateinit var mediaplayer: MediaPlayer
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,6 +52,24 @@ class UpdateLugarFragment : Fragment() {
         binding.btWhatsapp.setOnClickListener { enviarWhatsApp() }
         binding.btWeb.setOnClickListener { verWeb() }
         binding.btLocation.setOnClickListener { verMapa() }
+
+        if (args.lugar.rutaAudio?.isNotEmpty() == true) {
+            mediaplayer = MediaPlayer()
+            mediaplayer.setDataSource(args.lugar.rutaAudio)
+            mediaplayer.prepare()
+            binding.btPlay.isEnabled=true
+        } else {
+            binding.btPlay.isEnabled=false
+        }
+
+        if (args.lugar.rutaImagen?.isNotEmpty() == true) {
+            Glide.with(requireContext())
+                .load(args.lugar.rutaImagen)
+                .fitCenter()
+                .into(binding.imagen)
+        }
+
+        binding.btPlay.setOnClickListener { mediaplayer.start() }
 
         setHasOptionsMenu(true)  //Este fragmento debe tener un menu adicional
         return binding.root
